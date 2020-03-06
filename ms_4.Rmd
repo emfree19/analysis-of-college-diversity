@@ -16,6 +16,7 @@ library(dplyr)
 library(readr)
 library(janitor)
 library(stringr)
+library(tidycensus)
 
 ```
 
@@ -125,6 +126,7 @@ census_data <- census_data %>%
   mutate(race = str_replace_all(race, c("1" = "White", "2"= "Black or African American", "3" = "American Indican or Alaskan Native", "4" = "Asian", "5" = "Native Hawaiian or Pacific Islander", "6" = "Two or More Races")))
  
 ```
+
 ```{r, include = TRUE}
 
 # I will need to join the data sets about the college demographics 
@@ -161,4 +163,25 @@ joined_data <- join_data(joined_data, data_2013)
 joined_data <- join_data(joined_data, data_2012)
 joined_data <- join_data(joined_data, data_2011)
 joined_data <- join_data(joined_data, data_2010)
+
 ```
+
+```{r}
+
+m10 <- get_decennial(geography = "state", variables = "H001001", year = 2010, geometry = TRUE)
+state_data <- full_join(m10, joined_data, by = c("NAME" = "state_abbreviation"))
+
+african_american <- state_data %>%
+  group_by(NAME) %>%
+  mutate(african_american_mean = mean(percent_black_or_african_american, na.rm = TRUE)) %>%
+  filter(year == 2018)
+
+african_american %>%
+  ggplot() +
+  geom_sf(aes(geometry = geometry))
+
+
+
+    
+```
+
