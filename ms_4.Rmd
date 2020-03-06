@@ -1,0 +1,164 @@
+---
+title: "Gather"
+author: "Emma Freeman"
+date: "2/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(include = FALSE)
+
+# These libraries are required in order to run the code in the following r chunks. 
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(janitor)
+library(stringr)
+
+```
+
+```{r, include = FALSE}
+
+# I set include = FALSE, so that all of the information about the 
+# data being read in is not included when the code is run. This
+# information needs not be included after it has been evaluated and 
+# the data is wrangled and cleaned
+
+# When confronted with this data, I knew that the column names would
+# require extensive cleaning. I first tried to manually change each
+# of the column names but found that they had similar prefixes. I 
+# decided to us regular expressions and the function 
+# str_replace_all to change the column names. In the future I hope 
+# to be able to make this into a function as the adjustments to the
+# column names for each data set is fairly repetitive. Given that
+# I do not have a strong background in function writing in R, I plan # to confer with my TF about the best way to go about this. 
+
+data_2018 <- read_csv("raw-data//2018_college_data.csv") %>%
+  clean_names()
+names(data_2018) <- str_replace_all(names(data_2018), "^[^_]*_", "")
+names(data_2018) <- str_replace_all(names(data_2018), "_of_undergraduate_enrollment_that_are", "")
+
+data_2017 <- read_csv("raw-data//2017_college_data.csv") %>%
+  clean_names()
+names(data_2017) <- str_replace_all(names(data_2017), "^[^_]*_", "")
+names(data_2017) <- str_replace_all(names(data_2017), "_of_undergraduate_enrollment_that_are", "")
+
+data_2016 <- read_csv("raw-data//2016_college_data.csv") %>%
+  clean_names()
+names(data_2016) <- str_replace_all(names(data_2016), "^[^_]*_", "")
+names(data_2016) <- str_replace_all(names(data_2016), "_of_undergraduate_enrollment_that_are", "")
+
+data_2015 <- read_csv("raw-data//2015_college_data.csv") %>%
+  clean_names()
+names(data_2015) <- str_replace_all(names(data_2015), "^[^_]*_", "")
+names(data_2015) <- str_replace_all(names(data_2015), "_of_undergraduate_enrollment_that_are", "")
+
+data_2014 <- read_csv("raw-data//2014_college_data.csv") %>%
+  clean_names()
+names(data_2014) <- str_replace_all(names(data_2014), "^[^_]*_", "")
+names(data_2014) <- str_replace_all(names(data_2014), "_of_undergraduate_enrollment_that_are", "")
+
+data_2013 <- read_csv("raw-data//2013_college_data.csv") %>%
+  clean_names()
+names(data_2013) <- str_replace_all(names(data_2013), "^[^_]*_", "")
+names(data_2013) <- str_replace_all(names(data_2013), "_of_undergraduate_enrollment_that_are", "")
+
+data_2012 <- read_csv("raw-data//2012_college_data.csv") %>%
+  clean_names()
+names(data_2012) <- str_replace_all(names(data_2012), "^[^_]*_", "")
+names(data_2012) <- str_replace_all(names(data_2012), "_of_undergraduate_enrollment_that_are", "")
+names(data_2012) <- str_replace(names(data_2012), "sector_of_institution", "level_of_institution")
+
+data_2011 <- read_csv("raw-data//2011_college_data.csv") %>%
+  clean_names()
+names(data_2011) <- str_replace_all(names(data_2011), "^[^_]*_", "")
+names(data_2011) <- str_replace_all(names(data_2011), "_of_undergraduate_enrollment_that_are", "")
+
+data_2010 <- read_csv("raw-data//2010_college_data.csv") %>%
+  clean_names()
+names(data_2010) <- str_replace_all(names(data_2010), "^[^_]*_", "")
+names(data_2010) <- str_replace_all(names(data_2010), "_of_undergraduate_enrollment_that_are", "")
+
+# The 2009 data set contained slightly different column names and 
+# as such required additional cleaning. 
+
+data_2009 <- read_csv("raw-data//2009_college_data.csv") %>%
+  clean_names()
+names(data_2009) <- str_replace_all(names(data_2009), "^[^_]*_", "")
+names(data_2009) <- str_replace_all(names(data_2009), "1_", "")
+names(data_2009) <- str_replace_all(names(data_2009), "_of_undergraduate_enrollment_that_are", "")
+
+# This in the data from census.gov that contains the racial makeup 
+# of different states using the 2010 census data. It has a very 
+# different format than the other data from NCES. As such, I had to 
+# manually assign data types for the columns. 
+census_data <- read_csv("raw-data//census_data.csv", col_types = 
+                          cols(NAME = col_character(),
+                               SEX = col_character(),
+                               ORIGIN = col_character(),
+                               RACE = col_character(),
+                               AGE = col_double(),
+                               CENSUS2010POP = col_double())) %>%
+  
+  # clean_names() basically functioned in the same way that the tolower() function would work in this case 
+  
+  clean_names() %>% 
+  
+  # I selected the pertinent variables and disregarded the others.
+  
+  select(name, sex, origin, race, age, census2010pop)
+
+# The census data is very obscure without the key. Each column is 
+# made up of a certain set of numbers that act as categorical 
+# variables. I used the key provided on the Census website to make 
+# names of the observations more closely mimic the column names of 
+# the other datasets to make joining easier. I suspect, however,
+# that I will have to do sufficient arithmetic and pivoting to make 
+# a join between this data set and any of the others possible. At 
+# this point, however, I do not anticipate having to join this data so have left it as is. 
+
+census_data <- census_data %>%
+  mutate(sex = str_replace_all(sex, c("0" = "Total", "1" = "Male", "2" = "Female"))) %>%
+  mutate(origin = str_replace_all(origin, c("0" = "Total", "1" = "Not Hispanic", "2" = "Hispanic"))) %>%
+  mutate(race = str_replace_all(race, c("1" = "White", "2"= "Black or African American", "3" = "American Indican or Alaskan Native", "4" = "Asian", "5" = "Native Hawaiian or Pacific Islander", "6" = "Two or More Races")))
+ 
+```
+```{r, include = TRUE}
+
+# I will need to join the data sets about the college demographics 
+# from each of the years. Because the data sets have such similar 
+# column names, I created a function that would allow me to combine 
+# the data sets with less repetition of my code. 
+
+join_data <- function(x, y) {
+  full_join(x = x, y = y, by = c("unitid", 
+  "name", 
+  "year", 
+  "undergraduate_enrollment",
+  "percent_american_indian_or_alaska_native",
+  "percent_asian", 
+  "percent_black_or_african_american",
+  "percent_hispanic_latino",
+  "percent_native_hawaiian_or_other_pacific_islander",
+  "percent_white", 
+  "percent_two_or_more_races", 
+  "percent_race_ethnicity_unknown",
+  "percent_nonresident_alien",
+  "percent_women",
+  "percent_admitted_total",
+  "institution_size_category", 
+  "state_abbreviation", 
+  "level_of_institution", "degree_of_urbanization_urban_centric_locale", 
+  "percent_asian_native_hawaiian_pacific_islander")) 
+}
+joined_data <- join_data(data_2018, data_2017)
+joined_data <- join_data(joined_data, data_2016)
+joined_data <- join_data(joined_data, data_2015)
+joined_data <- join_data(joined_data, data_2014)
+joined_data <- join_data(joined_data, data_2013)
+joined_data <- join_data(joined_data, data_2012)
+joined_data <- join_data(joined_data, data_2011)
+joined_data <- join_data(joined_data, data_2010)
+```
