@@ -13,7 +13,7 @@ Furthermore, in additional study of the data, I hope to be able to isolate speci
 ## Data
 To accomplish the goal of this project, I have amassed data sets from each year that contain information about almost 7,00 institutions in the continental United States. Each data set contains the information about these institutions in a specific year, and I have collected the data sets from 2009 to 2018. These data sets all come from nces.ed.gov (the Nation Center for Education Statistics).
 
-In addition to these data sets, I have collected census race data from (census.gov) in order to compare the mean racial diversity of a set of institutions in a particular state to the general degree of diversity in that state.
+In addition to these data sets, I have loaded race data from the tidycensus r package in order to compare the mean racial diversity of a set of institutions in a particular state to the general degree of diversity in that state.
 
 ## About Me
 I am a college freshman at Harvard University, and I plan to study Computer Science. 
