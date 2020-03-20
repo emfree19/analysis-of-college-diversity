@@ -1,7 +1,6 @@
 ---
 title: "Milestone 5"
 author: "Emma Freeman"
-date: "3/20/2020"
 output: html_document
 ---
 
@@ -35,6 +34,9 @@ data_2018 <- read_csv("raw-data//2018_college_data.csv") %>%
 names(data_2018) <- str_replace_all(names(data_2018), "^[^_]*_", "")
 names(data_2018) <- str_replace_all(names(data_2018), "_of_undergraduate_enrollment_that_are", "")
 
+# This takes data from the tidycensus library and gives population estimates 
+# for different races in the United States circa the year 2010
+
 census_data_2 <- get_acs(geography = "us", 
                          variables = c(
                            total_pop = "B01001_001",
@@ -46,6 +48,9 @@ census_data_2 <- get_acs(geography = "us",
                            pop_other = "B01001F_001",
                            pop_two_or_more_races = "B01001G_001"),
                          year = 2010) 
+
+# I pivoted wider, so that I could use the population variables and calculate
+# the percent of the population that each race holds 
 
 census_data_2 <- census_data_2 %>%
   select(variable, estimate) %>%
@@ -60,7 +65,15 @@ census_data_2 <- census_data_2 %>%
 ```
 
 ```{r}
-reduced_size_2018 <- data_2018 %>%
+
+# This removes the institutions that either did not report a size category or 
+# it was not applicable because there is no bosplot for these items 
+
+size_2018 <- data_2018 %>%
+  
+  # The institution size variable must be a factor, so that they can be used as
+  # the variable on the x-axis of a box plot
+  
   mutate(institution_size_category = factor(institution_size_category,
                                             levels = c("Under 1,000",
                                                        "1,000 - 4,999",
@@ -71,16 +84,32 @@ reduced_size_2018 <- data_2018 %>%
                                                        "Not reported"))) %>%
   filter(institution_size_category != "Not applicable" & institution_size_category != "Not reported") 
   
-aa_plot_2018 <- reduced_size_2018 %>%
+aa_plot_2018 <- size_2018 %>%
+  
+  # This removes any NA observations in order to remove the message about the
+  # removal of NA observations that occurs when the geom_boxplot() is used
+  
   filter(!is.na(percent_black_or_african_american)) %>%
   ggplot(aes(x = as_factor(institution_size_category), y = percent_black_or_african_american)) +
+  
+  # This shows the decreasing number of items toward the extremes 
+  
   geom_boxplot(alpha = 0.25) +
   xlab("Size of Institution") + 
   ylab("Percent Black or African American") +
+  
+  # I will use them_tufte going forward, so that my final project appears 
+  # consistent
+  
   theme_tufte() + 
   labs(title = "Percent of Black or African Students by Size of Institution",
        subtitle = "With comparison at national population estimate") +
   theme(axis.line = element_line()) +
+  
+  # This gives the national estimate for the percentage of the population that 
+  # is African American, offering a comparison for the level of representation 
+  # in schools 
+  
   geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
 aa_plot_2018
 ```
