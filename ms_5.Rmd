@@ -19,6 +19,9 @@ library(forcats)
 library(ggthemes)
 ```
 
+Link to repo: https://github.com/emfree19/final_project
+
+
 ```{r data wrangling, include = FALSE}
 
 # I made this include = FALSE to remove the pop ups included with the reading 
