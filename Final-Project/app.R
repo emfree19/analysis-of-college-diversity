@@ -14,6 +14,7 @@ library(readr)
 library(janitor)
 library(stringr)
 library(tidycensus)
+census_api_key("85884debe86c4a15bb8d549f40ad1f1c9c415045")
 library(forcats)
 library(ggthemes)
 
@@ -73,7 +74,7 @@ ui <- fluidPage(
                              selectInput(
                                  "plot_type",
                                  "Plot Type",
-                                 c("Option A" = "a", "Option B" = "b")
+                                 c("Percent Black or African American" = "a", "Percent Asian" = "b")
                              )),
                          mainPanel(plotOutput("line_plot")))
                  )),
@@ -120,33 +121,55 @@ ui <- fluidPage(
 server <- function(input, output) {
 
     output$line_plot <- renderPlot({
-        size_2018 %>%
+        
+        if(input$plot_type == "a") {
+            size_2018 %>%
+                
+                # This removes any NA observations in order to remove the message about the
+                # removal of NA observations that occurs when the geom_boxplot() is used
+                
+                filter(!is.na(percent_black_or_african_american)) %>%
+                ggplot(aes(x = as_factor(institution_size_category), y = percent_black_or_african_american)) +
+                
+                # This shows the decreasing number of items toward the extremes 
+                
+                geom_boxplot(alpha = 0.25) +
+                xlab("Size of Institution") + 
+                ylab("Percent Black or African American") +
+                
+                # I will use them_tufte going forward, so that my final project appears 
+                # consistent
+                
+                theme_tufte() + 
+                labs(title = "Percent of Black or African Students by Size of Institution",
+                     subtitle = "With comparison at national population estimate") +
+                theme(axis.line = element_line()) +
+                
+                # This gives the national estimate for the percentage of the population that 
+                # is African American, offering a comparison for the level of representation 
+                # in schools 
+                
+                geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
+        }
+        else {
+            if(input$plot_type == "b") {
+                size_2018 %>%
+                    
+                    
+                    filter(!is.na(percent_asian)) %>%
+                    ggplot(aes(x = as_factor(institution_size_category), y = percent_asian)) +
+                    geom_boxplot(alpha = 0.25) +
+                    xlab("Size of Institution") + 
+                    ylab("Percent Asian") +
+                    theme_tufte() + 
+                    labs(title = "Percent of Asian Students by Size of Institution",
+                         subtitle = "With comparison at national population estimate") +
+                    theme(axis.line = element_line()) +
+                    geom_hline(yintercept = census_data_2$pct_asian, color = "red")
+            }
             
-            # This removes any NA observations in order to remove the message about the
-            # removal of NA observations that occurs when the geom_boxplot() is used
-            
-            filter(!is.na(percent_black_or_african_american)) %>%
-            ggplot(aes(x = as_factor(institution_size_category), y = percent_black_or_african_american)) +
-            
-            # This shows the decreasing number of items toward the extremes 
-            
-            geom_boxplot(alpha = 0.25) +
-            xlab("Size of Institution") + 
-            ylab("Percent Black or African American") +
-            
-            # I will use them_tufte going forward, so that my final project appears 
-            # consistent
-            
-            theme_tufte() + 
-            labs(title = "Percent of Black or African Students by Size of Institution",
-                 subtitle = "With comparison at national population estimate") +
-            theme(axis.line = element_line()) +
-            
-            # This gives the national estimate for the percentage of the population that 
-            # is African American, offering a comparison for the level of representation 
-            # in schools 
-            
-            geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
+        }
+        
         
     })
     
