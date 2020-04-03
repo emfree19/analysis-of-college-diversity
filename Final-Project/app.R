@@ -64,10 +64,10 @@ size_2018 <- data_2018 %>%
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     ui <- navbarPage(
-        "Final Project Title",
+        "Diversity of Upper Level Education",
         tabPanel("Model",
                  fluidPage(
-                     titlePanel("Model Title"),
+                     titlePanel("Institution Size"),
                      sidebarLayout(
                          sidebarPanel(
                              selectInput(
@@ -149,6 +149,7 @@ server <- function(input, output) {
             geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
         
     })
+    
 }
 
 # Run the application 
