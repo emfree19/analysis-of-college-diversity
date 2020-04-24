@@ -143,6 +143,9 @@ joined_data <- join_data(joined_data, data_2012)
 joined_data <- join_data(joined_data, data_2011)
 joined_data <- join_data(joined_data, data_2010)
 
+write.csv(joined_data, 'joined_data.csv', row.names = F)
+
+test <- read.csv('joined_data.csv', stringsAsFactors = F)
 ```
 
 ```{r, include = FALSE}
@@ -190,29 +193,130 @@ census_data_2 <- census_data_2 %>%
 ```
 
 
+
 ```{r}
-reduced_size_2018 <- data_2018 %>%
+
+mean_data <- joined_data %>%
+  group_by(name) %>%
+  mutate(mean_enrollment = mean(undergraduate_enrollment, na.rm = T),
+         mean_african_american = mean(percent_black_or_african_american, na.rm = T),
+         mean_asian = mean(percent_asian, na.rm = T),
+         mean_native = mean(percent_american_indian_or_alaska_native, na.rm = T),
+         mean_hispanic = mean(percent_hispanic_latino, na.rm = T),
+         mean_pacific = mean(percent_native_hawaiian_or_other_pacific_islander, na.rm = T),
+         mean_white = mean(percent_white, na.rm = T),
+         mean_two = mean(percent_two_or_more_races, na.rm = T),
+         mean_unknown = mean(percent_race_ethnicity_unknown, na.rm = T),
+         mean_women = mean(percent_women, na.rm = T),
+         mean_admitted = mean(percent_admitted_total, na.rm = T)) %>%
+  filter(level_of_institution == "Four or more years") %>%
   mutate(institution_size_category = factor(institution_size_category,
                                             levels = c("Under 1,000",
                                                        "1,000 - 4,999",
-                                                       "5,000 - 4,999", 
+                                                       "5,000 - 9,999", 
                                                        "10,000 - 19,999",
                                                        "20,000 and above",
                                                        "Not applicable",
                                                        "Not reported"))) %>%
-  filter(institution_size_category != "Not applicable" & institution_size_category != "Not reported") 
-  
-aa_plot_2018 <- reduced_size_2018 %>%
-  filter(!is.na(percent_black_or_african_american)) %>%
-  ggplot(aes(x = as_factor(institution_size_category), y = percent_black_or_african_american)) +
+  filter(institution_size_category != "Not applicable" & institution_size_category != "Not reported") %>%
+  mutate(degree_of_urbanization_urban_centric_locale = case_when(str_detect(degree_of_urbanization_urban_centric_locale, "City") ~ "City",
+          str_detect(degree_of_urbanization_urban_centric_locale, "Suburb") ~ "Suburb",
+          str_detect(degree_of_urbanization_urban_centric_locale, "Town") ~ "Town",
+          str_detect(degree_of_urbanization_urban_centric_locale, "Rural") ~ "Rural")) %>%
+  mutate(degree_of_urbanization_urban_centric_locale = factor(degree_of_urbanization_urban_centric_locale, levels = c("Rural", "Town", "Suburb", "City"))) %>%
+  mutate(quantiles_women = case_when(mean_women %in% (1:24) ~ "0 to 24%",
+                                           mean_women %in% (25:49) ~ "25 to 49%",
+                                           mean_women %in% (50:74) ~ "50 to 74%",
+                                           mean_women %in% (75:100) ~ "75 to 100%")) %>%
+  filter(!is.na(quantiles_women)) %>%
+  mutate(quantiles_admission = case_when(percent_admitted_total %in% (1:24) ~ "0 to 24%",
+                                           percent_admitted_total %in% (25:49) ~ "25 to 49%",
+                                           percent_admitted_total %in% (50:74) ~ "50 to 74%",
+                                           percent_admitted_total %in% (75:100) ~ "75 to 100%")) %>%
+  filter(!is.na(quantiles_admission)) %>%
+  select(name, year, undergraduate_enrollment, tuition_and_fees_2018_19, institution_size_category, level_of_institution, degree_of_urbanization_urban_centric_locale, mean_enrollment, mean_african_american, mean_asian, mean_hispanic, mean_white, mean_women, mean_admitted, quantiles_women, quantiles_admission)
+write.csv(mean_data, 'mean_data.csv', row.names = F)
+
+
+aa_institution <- ggplot(mean_data, aes(x = institution_size_category, y = mean_african_american)) +
   geom_boxplot(alpha = 0.25) +
   xlab("Size of Institution") + 
   ylab("Percent Black or African American") +
-  theme_tufte() + 
+  theme_classic() + 
   labs(title = "Percent of Black or African Students by Size of Institution",
        subtitle = "With comparison at national population estimate") +
-  theme(axis.line = element_line()) +
   geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
-size_plot_2018
-```
+library(dotwhisker)
+library(ggthemes)
+library(broom)
 
+
+        
+  
+aa_women <- ggplot(mean_data, aes(x = as.factor(quantiles_women), y = mean_african_american)) +
+  geom_boxplot(alpha = 0.25) +
+  xlab("Percent of Female Students") + 
+  ylab("Percent Black or African American Students") +
+  theme_classic() + 
+  labs(title = "Percent of Black or African Students by Percent of Female Students",
+       subtitle = "With comparison at national population estimate") +
+  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
+
+  
+aa_admissions <- ggplot(mean_data, aes(x = as.factor(quantiles_admission), y = mean_african_american)) +
+  geom_boxplot(alpha = 0.25) +
+  xlab("Admissions Rate") + 
+  ylab("Percent Black or African American Students") +
+  theme_classic() + 
+  labs(title = "Percent of Black or African Students by Admissions Rate",
+       subtitle = "With comparison at national population estimate") +
+  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
+
+# library(dotwhisker)
+
+
+
+  
+aa_urban <- ggplot(mean_data, aes(x = as.factor(degree_of_urbanization_urban_centric_locale), y = mean_african_american)) +
+  geom_boxplot(alpha = 0.25) +
+  xlab("Level of Urbanization of the Institution") + 
+  ylab("Percent Black or African American") +
+  theme_classic() + 
+  labs(title = "Percent of Black or African Students by Level of Urbanization",
+       subtitle = "With comparison at national population estimate") +
+  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
+
+
+
+model_african_american <- lm(mean_african_american ~ mean_enrollment + 
+                               mean_women + 
+                               mean_admitted,
+                             data = mean_data) %>%
+  tidy(conf.int = TRUE)
+dwplot(model_african_american) %>%
+  relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
+                     mean_women = "Percentage of Women",
+                     mean_admitted = "Admissions Rate") +
+  theme_classic() +
+  ggtitle("Correlation between Independent Variables and African American Student Population") +
+  theme(legend.position = "none") 
+model_african_american_2 <- lm(mean_african_american ~ degree_of_urbanization_urban_centric_locale,
+                               data = mean_data) %>%
+  tidy(conf.int = TRUE)
+
+dwplot(model_african_american_2, show_intercept = TRUE) %>%
+  relabel_predictors(`(Intercept)` = "Baseline: Rural",
+                     degree_of_urbanization_urban_centric_localeTown = "Town",
+                     degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
+                     degree_of_urbanization_urban_centric_localeCity = "City") +
+  theme_classic() +
+  ggtitle("Correlation between Locale and African American Student Population") +
+  theme(legend.position = "none")
+
+
+
+
+aa_boxplots <- (aa_institution / aa_women / aa_admissions)
+aa_boxplots
+
+```
