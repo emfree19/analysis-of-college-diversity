@@ -19,6 +19,7 @@ library(ggthemes)
 library(dotwhisker)
 library(broom)
 library(patchwork) 
+library(shinythemes)
 
 mean_data <- read_csv("mean_data.csv", col_types = cols())
 mean_data <- mean_data %>%
@@ -34,42 +35,63 @@ mean_data <- mean_data %>%
 
 census_data_2 <- read_csv("census.csv", col_types = cols())
 
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("flatly"),
     ui <- navbarPage(
         "Diversity of Upper Level Education",
         tabPanel("About", 
                  titlePanel("About"),
                  h3("Project Background and Motivations"),
-                 p("This project aims to determine the factors that correlate 
-                 with racial and ethnic diversity of college populations. I 
-                 picked several variables that I wanted to explore: size of 
-                 institution, percent of women, admissions rate, and locale. 
-                 Furthermore, I chose the top three minorities (latinx, african 
-                 american, and asian) to consider. Note, I have the information for other
-                 race data. I found the correlations between these independent variables 
-                 and the dependent variables defined above. I found the correlation 
-                 coefficients and defined the independent variables categorically 
-                 in order to more clearly show the relationship in the data. I 
-                 used these variables to help determine what may to racially 
-                 diverse universities and racially uniform universities.
-                 This was a central topic (before the pandemic) due to the recent 
-                 lawsuit regarding Harvard's admissions practices."),
+                 p("Following the Harvard Admissions lawsuit (regarding the 
+                   allegedly unfair admission practices for Asian Americans), I 
+                   thought it would be interesting to determine what factors of 
+                   upper level educational institutions correlate with racial 
+                   and ethnic diversity of these college populations. At first, 
+                   I planned to look at the admissions data for ivy league 
+                   schools but soon realized that there would be very limited 
+                   data, and the admissions practices of these top tier schools 
+                   are already under severe scrutiny. Instead, I thought it 
+                   would be more broadly applicable and interesting to consider 
+                   the greater college sphere of the United States."),
+                 p("There were approximately 7,000 schools that had provided 
+                   their admissions data. From these schools, I chose the 
+                   admissions data for the top three minority groups in the 
+                   United States (Latinx, African American, and Asian 
+                   individuals) to study. Note, I also have the information for 
+                   other minorities for future consideration. Then, I chose 
+                   several independent variables with which I could compare the 
+                   three race variables. These independent variables are: size 
+                   of the institution, percent of the university population that
+                   are women, admissions rate, and location of the campus. 
+                   I used these variables to determine what may contribute to 
+                   racially diverse universities vs. racially uniform 
+                   universities using linear models."),
                  h3("Data"),
-                 p("To accomplish the goal of this project, I have amassed data 
-                 sets from each year (between 2010 to 2018) that contain information 
-                 about almost 7,000 institutions in the continental United States. 
-                 Each data set had the pertinent variables about these institutions for 
-                 a given year. The data was taken from the", 
+                 p("The", 
                  a(href = "https://nces.ed.gov/ipeds/use-the-data", "National Center 
                  for Education Statistics"), 
-                 "In addition, I have loaded race data from 
-                 the tidycensus r package in order to compare the mean racial population
-                 of the country as a whole to determine the either overrepresentation or 
-                 underrepresentation of a minority"),
+                 "has  data admissions data for almost 7,000 upper level 
+                 educational institutions from 1980 to 2018. I used their 
+                 survey data to create custom data files with the variables I 
+                 wanted to investigate. I downloaded 9 datasets from 2010 to 
+                 2018, which enabled me to take mean admissions data for each 
+                 institution over the time period. I chose to use the mean data 
+                 (instead of data from individual years) in order lessen the 
+                 effects of any anomalous data. In addition to the National 
+                 Center for Education Statistics Data, I used", 
+                 a(href = "https://cran.r-project.org/web/packages/tidycensus/tidycensus.pdf", 
+                   "tidycensus"),
+                 "package which has population data for the United States for 
+                 many years and down to the county level. I chose 2010 data 
+                 at the country level with which to compare college racial data, 
+                 so I could determine overrepresentation or underrepresentation 
+                 of minorities."),
                  h3("About Me"),
-                 p("My name is Emma Freeman and I study Computer Science at Harvard. 
-                    You can reach me at efreeman@college.harvard.edu."),
-                 p("The code for this project can be found at",
+                 p("My name is Emma Freeman. I am a first year at Harvard 
+                 planning to study computer science. I'm a member of Harvard's
+                 Open Data Project and enjoy data science. For more information 
+                 about the project, you can reach me at 
+                 efreeman@college.harvard.edu."),
+                 p("The code for this project can be found at this",
                    a(href = "https://github.com/emfree19/final_project", "github repo"), ".")),
         tabPanel("Latinx Student Population",
                  fluidPage(
@@ -80,8 +102,9 @@ ui <- fluidPage(
                              "Independent Variables",
                              c("Size of Institution, Percent Women, Admissions Rate" = "a",
                                "Locale" = "b")),
-                         p("Here are the coefficients."),
-                         plotOutput("h_coefficients")
+                         h4("Correlation Coefficients"),
+                         plotOutput("h_coefficients"),
+                         textOutput("h_output_1")
                          ),
                      mainPanel(width = 6,
                                plotOutput("h_institution"),
@@ -97,8 +120,9 @@ ui <- fluidPage(
                              "Independent Variables",
                              c("Size of Institution, Percent Women, Admissions Rate" = "a", 
                                "Locale" = "b")),
-                         p("Here are the coefficients."),
-                         plotOutput("aa_coefficients")
+                         h4("Correlation Coefficients"),
+                         plotOutput("aa_coefficients"),
+                         textOutput("aa_output_1")
                      ),
                      mainPanel(width = 6, 
                                plotOutput("aa_institution"),
@@ -114,8 +138,9 @@ ui <- fluidPage(
                              "Independent Variables",
                              c("Size of Institution, Percent Women, Admissions Rate" = "a",
                                "Locale" = "b")),
-                             p("Here are the coefficients."),
-                             plotOutput("a_coefficients")
+                             h4("Correlation Coefficients"),
+                             plotOutput("a_coefficients"),
+                             textOutput("a_output_1")
                      ),
                      mainPanel(width = 6,
                                plotOutput("a_institution"),
@@ -129,6 +154,41 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    output$aa_output_1 <- renderText({
+        if(input$plot_type_aa == "a") {
+            "Above, the plot shows the correlation coefficients between the mean 
+            percent of African American students and the variables undergraduate enrollment 
+            (this represents the continuous scale for size of institution), the 
+            percent of female students, and the admissions rate of colleges. The 
+            correlation coefficient for the linear model comparing mean percent 
+            of African American students and undergraduate enrollment is very close to zero,
+            which indicates that there is not a significant correlation between
+            the two variables. Similarly, the correlation coefficient for admissions
+            rate is close to 0, suggesting a negligible relationship between
+            to variables. The correlation coefficent for the percentage of women
+            is 0.15, which suggests that a 1% increase in the percent of female
+            students at an institution corresponds to a 0.15% increase in 
+            African American Students. 
+            The graphs to the right show the boxplots for the data represented
+            by the correlation coefficients but on a categorical scale instead of 
+            a continuous scale. I decided to represent this data with boxplots
+            instead of scatterplots because the scatterplots were prone to 
+            overplotting."
+        }
+        else{
+            if(input$plot_type_aa == "b"){
+                "On this page, we have another independent variable, locale of 
+                the institutions. There are four possible options: Rural, Town,
+                Suburb, and City. The coefficient plot above, shows the intercept
+                (Rural) at ~8%. Furthermore, the correlation coefficients for
+                institutions located in towns, suburbs, and cities are positive (to
+                varying degrees) suggesting a tendency to a greater percentage of 
+                African American students as level of urbanity increases."
+            }
+        }
+        
+    })
+    
     output$aa_coefficients <- renderPlot({
         if(input$plot_type_aa == "a") {
             model_african_american <- lm(mean_african_american ~ mean_enrollment + 
@@ -136,7 +196,7 @@ server <- function(input, output) {
                                              mean_admitted,
                                          data = mean_data) %>%
                 tidy(conf.int = TRUE)
-            dwplot(model_african_american) %>%
+            dwplot(model_african_american, color = "red") %>%
                 relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
                                    mean_women = "Percentage of Women",
                                    mean_admitted = "Admissions Rate") +
@@ -150,7 +210,7 @@ server <- function(input, output) {
                                                data = mean_data) %>%
                     tidy(conf.int = TRUE)
                 
-                dwplot(model_african_american_2, show_intercept = TRUE) %>%
+                dwplot(model_african_american_2, show_intercept = TRUE, color = "red") %>%
                     relabel_predictors(`(Intercept)` = "Baseline: Rural",
                                        degree_of_urbanization_urban_centric_localeTown = "Town",
                                        degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
@@ -214,7 +274,40 @@ server <- function(input, output) {
         }
         else{}
     })
-    
+    output$h_output_1 <- renderText({
+        if(input$plot_type_h == "a") {
+            "Above, the plot shows the correlation coefficients between the mean 
+            percent of Latinx students and the variables undergraduate enrollment 
+            (this represents the continuous scale for size of institution), the 
+            percent of female students, and the admissions rate of colleges. The 
+            correlation coefficient for the linear model comparing mean percent 
+            of Latinx students and undergraduate enrollment is very close to zero,
+            which indicates that there is not a significant correlation between
+            the two variables. Percentage of Female Students and Admissions Rate 
+            have a slightly more negative relationship with percent of Latinx students
+            but both are very slight negative corrleations. 
+            The graphs to the right show the boxplots for the data represented
+            by the correlation coefficients but on a categorical scale instead of 
+            a continuous scale. I decided to represent this data with boxplots
+            instead of scatterplots because the scatterplots were prone to 
+            overplotting. Nonetheless, the boxplots also have their cons: to viewers,
+            they may seem to show a greater relationship between the variables 
+            than is given. That is why is showed both the correlation coefficients
+            and the box plots."
+        }
+        else{
+            if(input$plot_type_h == "b"){
+                "On this page, we have another independent variable, locale of 
+                the institutions. There are four possible options: Rural, Town,
+                Suburb, and City. The coefficient plot above, shows the intercept
+                (Rural) at ~8%. Furthermore, the correlation coefficient for institutions
+                located in town is negative, while the correlation coefficient for suburb
+                and city are positive. These represent the respective mean decrease
+                and increase in percent of Latinx students the is represented in the boxplot."
+            }
+        }
+
+    })
     output$h_coefficients <- renderPlot({
         if(input$plot_type_h == "a") {
             model_hispanic <- lm(mean_hispanic ~ mean_enrollment + 
@@ -222,7 +315,7 @@ server <- function(input, output) {
                                      mean_admitted,
                                  data = mean_data) %>%
                 tidy(conf.int = TRUE)
-            dwplot(model_hispanic) %>%
+            dwplot(model_hispanic, dot_args = list(color = "dark blue"), whisker_args = list(color = "dark blue")) %>%
                 relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
                                    mean_women = "Percentage of Women",
                                    mean_admitted = "Admissions Rate") +
@@ -236,7 +329,7 @@ server <- function(input, output) {
                                        data = mean_data) %>%
                     tidy(conf.int = TRUE)
                 
-                dwplot(model_hispanic_2, show_intercept = TRUE) %>%
+                dwplot(model_hispanic_2, show_intercept = TRUE, dot_args = list(color = " dark blue"), whisker_args = list(color = " dark blue")) %>%
                     relabel_predictors(`(Intercept)` = "Baseline: Rural",
                                        degree_of_urbanization_urban_centric_localeTown = "Town",
                                        degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
@@ -256,7 +349,7 @@ server <- function(input, output) {
                 theme_classic() + 
                 labs(title = "Percent of Latinx Students by Size of Institution",
                      subtitle = "With comparison at national population estimate") +
-                geom_hline(yintercept = census_data_2$pct_hispanic, color = "red") 
+                geom_hline(yintercept = census_data_2$pct_hispanic, color = "dark blue") 
         }
         else{
             if(input$plot_type_h == "b"){
@@ -267,7 +360,7 @@ server <- function(input, output) {
                     theme_classic() + 
                     labs(title = "Percent of Latinx Students by Level of Urbanization",
                          subtitle = "With comparison at national population estimate") +
-                    geom_hline(yintercept = census_data_2$pct_hispanic, color = "red")
+                    geom_hline(yintercept = census_data_2$pct_hispanic, color = " dark blue")
             }
         }
     })
@@ -280,7 +373,7 @@ server <- function(input, output) {
                 theme_classic() + 
                 labs(title = "Percent of Latinx Students by Percent of Female Students",
                      subtitle = "With comparison at national population estimate") +
-                geom_hline(yintercept = census_data_2$pct_hispanic, color = "red")
+                geom_hline(yintercept = census_data_2$pct_hispanic, color = "dark blue")
         }
         else{}
     })
@@ -293,11 +386,44 @@ server <- function(input, output) {
                 theme_classic() + 
                 labs(title = "Percent of Latinx Students by Admissions Rate",
                      subtitle = "With comparison at national population estimate") +
-                geom_hline(yintercept = census_data_2$pct_hispanic, color = "red")
+                geom_hline(yintercept = census_data_2$pct_hispanic, color = "dark blue")
         }
         else{}
     })
     
+    output$a_output_1 <- renderText({
+        if(input$plot_type_a == "a") {
+            "Above, the plot shows the correlation coefficients between the mean 
+            percent of Asian students and the variables undergraduate enrollment 
+            (this represents the continuous scale for size of institution), the 
+            percent of female students, and the admissions rate of colleges. The 
+            correlation coefficient for the linear model comparing mean percent 
+            of Asian students and undergraduate enrollment is very close to zero,
+            which indicates that there is not a significant correlation between
+            the two variables. Percentage of Female Students and Admissions Rate 
+            have a slightly more negative relationship with percent of Asian students.
+            In fact, the correlation between percent of Asian students and admissions
+            rate is -0.15, suggesting that an increase of one percent of admissions 
+            rate corresponds to a 0.15% decrease in the percent of Asian students.
+            The graphs to the right show the boxplots for the data represented
+            by the correlation coefficients but on a categorical scale instead of 
+            a continuous scale. I decided to represent this data with boxplots
+            instead of scatterplots because the scatterplots were prone to 
+            overplotting."
+        }
+        else{
+            if(input$plot_type_a == "b"){
+                "On this page, we have another independent variable, locale of 
+                the institutions. There are four possible options: Rural, Town,
+                Suburb, and City. The coefficient plot above, shows the intercept
+                (Rural) at ~3.5%. Furthermore, the correlation coefficient for institutions
+                located in town is negative, while the correlation coefficient for suburb
+                and city are positive. These represent the respective mean decrease
+                and increase in percent of Latinx students the is represented in the boxplot."
+            }
+        }
+        
+    })
     output$a_coefficients <- renderPlot({
         if(input$plot_type_a == "a") {
             model_asian <- lm(mean_asian ~ mean_enrollment + 
@@ -305,7 +431,7 @@ server <- function(input, output) {
                                   mean_admitted,
                               data = mean_data) %>%
                 tidy(conf.int = TRUE)
-            dwplot(model_asian) %>%
+            dwplot(model_asian, dot_args = list(color = " dark green"), whisker_args = list(color = " dark green")) %>%
                 relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
                                    mean_women = "Percentage of Women",
                                    mean_admitted = "Admissions Rate") +
@@ -319,7 +445,7 @@ server <- function(input, output) {
                                     data = mean_data) %>%
                     tidy(conf.int = TRUE)
                 
-                dwplot(model_asian_2, show_intercept = TRUE) %>%
+                dwplot(model_asian_2, show_intercept = TRUE, dot_args = list(color = "dark green"), whisker_args = list(color = " dark green")) %>%
                     relabel_predictors(`(Intercept)` = "Baseline: Rural",
                                        degree_of_urbanization_urban_centric_localeTown = "Town",
                                        degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
@@ -340,7 +466,7 @@ server <- function(input, output) {
                 theme_classic() + 
                 labs(title = "Percent of Asian Students by Size of Institution",
                      subtitle = "With comparison at national population estimate") +
-                geom_hline(yintercept = census_data_2$pct_asian, color = "red")
+                geom_hline(yintercept = census_data_2$pct_asian, color = "dark green")
             
         }
         else{
@@ -352,7 +478,7 @@ server <- function(input, output) {
                     theme_classic() + 
                     labs(title = "Percent of Asian Students by Level of Urbanization",
                          subtitle = "With comparison at national population estimate") +
-                    geom_hline(yintercept = census_data_2$pct_asian, color = "red")
+                    geom_hline(yintercept = census_data_2$pct_asian, color = "dark green")
             }
         }
         
@@ -366,7 +492,7 @@ server <- function(input, output) {
                 theme_classic() + 
                 labs(title = "Percent of Asian Students by Percent of Female Students",
                      subtitle = "With comparison at national population estimate") +
-                geom_hline(yintercept = census_data_2$pct_asian, color = "red")
+                geom_hline(yintercept = census_data_2$pct_asian, color = "dark green")
         }
         else{}
     })
@@ -380,9 +506,11 @@ server <- function(input, output) {
                 theme_classic() + 
                 labs(title = "Percent of Asian Students by Admissions Rate",
                      subtitle = "With comparison at national population estimate") +
-                geom_hline(yintercept = census_data_2$pct_asian, color = "red")
+                geom_hline(yintercept = census_data_2$pct_asian, color = "dark green")
         }
-        else{}
+        else{
+            element_blank()
+        }
     })
     
 
