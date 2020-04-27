@@ -192,6 +192,11 @@ census_data_2 <- census_data_2 %>%
 
 
 ```{r}
+
+# This takes the mean data for the joined_data, so that I can reduce the effect 
+# of outliers 
+# From there, I created some factor columns to be used in the boxplots in the project
+
 mean_data <- joined_data %>%
   group_by(name) %>%
   mutate(mean_enrollment = mean(undergraduate_enrollment, na.rm = T),
