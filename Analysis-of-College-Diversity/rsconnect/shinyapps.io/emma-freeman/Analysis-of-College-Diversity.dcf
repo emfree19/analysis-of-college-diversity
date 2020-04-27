@@ -5,8 +5,8 @@ account: emma-freeman
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2180577
-bundleId: 3069655
+bundleId: 3069808
 url: https://emma-freeman.shinyapps.io/Analysis-of-College-Diversity/
-when: 1587956943.92224
+when: 1587959190.2095
 asMultiple: FALSE
 asStatic: FALSE

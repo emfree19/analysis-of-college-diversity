@@ -165,7 +165,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                    would be more broadly applicable and interesting to consider 
                    the greater college sphere of the United States."),
                  p("There were approximately 7,000 schools that had provided 
-                   their admissions data. From these schools, I chose the 
+                   their enrollment data. From these schools, I chose the 
                    admissions data for the top three minority groups in the 
                    United States (Latinx, African American, and Asian 
                    individuals) to study. Note, I also have the information for 
