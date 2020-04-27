@@ -95,7 +95,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                      ),
                      
                      # These correspond to the plots on the right side of the
-                     # page 
+                     # pages
                      
                      mainPanel(width = 6, 
                                plotOutput("aa_institution"),
