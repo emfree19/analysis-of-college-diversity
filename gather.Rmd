@@ -147,14 +147,11 @@ joined_data <- join_data(joined_data, data_2010)
 
 # test <- read.csv('joined_data.csv', stringsAsFactors = F)
 ```
-
 ```{r, include = FALSE}
-
 # Last week, I was going to use the census data I had downloaded
 # censusdata.gov. Instead I have decided to use the 2010 census data
 # included with the tidycensus package because it includes the 
 # geometry for map plots.
-
 census_data <- get_decennial(geography = "state", 
                              variables = c(
                                total_pop = "H006001",
@@ -166,7 +163,6 @@ census_data <- get_decennial(geography = "state",
                                pop_two_or_more_races = "H006008"), 
                              year = 2010, 
                              geometry = TRUE)
-
 census_data_2 <- get_acs(geography = "us", 
                          variables = c(
                            total_pop = "B01001_001",
@@ -179,7 +175,6 @@ census_data_2 <- get_acs(geography = "us",
                            pop_two_or_more_races = "B01001G_001",
                            pop_hispanic = "B01001I_001"),
                          year = 2010) 
-
 census_data_2 <- census_data_2 %>%
   select(variable, estimate) %>%
   pivot_wider(names_from = variable, values_from = estimate) %>%
@@ -197,7 +192,6 @@ census_data_2 <- census_data_2 %>%
 
 
 ```{r}
-
 mean_data <- joined_data %>%
   group_by(name) %>%
   mutate(mean_enrollment = mean(undergraduate_enrollment, na.rm = T),
@@ -239,213 +233,4 @@ mean_data <- joined_data %>%
   select(name, year, undergraduate_enrollment, tuition_and_fees_2018_19, institution_size_category, level_of_institution, degree_of_urbanization_urban_centric_locale, mean_enrollment, mean_african_american, mean_asian, mean_hispanic, mean_white, mean_women, mean_admitted, quantiles_women, quantiles_admission)
 # write.csv(mean_data, 'mean_data.csv', row.names = F)
 
-
-aa_institution <- ggplot(mean_data, aes(x = institution_size_category, y = mean_african_american)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Size of Institution") + 
-  ylab("Percent Black or African American") +
-  theme_classic() + 
-  labs(title = "Percent of Black or African Students by Size of Institution",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
-library(dotwhisker)
-library(ggthemes)
-library(broom)
-
-
-        
-  
-aa_women <- ggplot(mean_data, aes(x = as.factor(quantiles_women), y = mean_african_american)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Percent of Female Students") + 
-  ylab("Percent Black or African American Students") +
-  theme_classic() + 
-  labs(title = "Percent of Black or African Students by Percent of Female Students",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
-
-  
-aa_admissions <- ggplot(mean_data, aes(x = as.factor(quantiles_admission), y = mean_african_american)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Admissions Rate") + 
-  ylab("Percent Black or African American Students") +
-  theme_classic() + 
-  labs(title = "Percent of Black or African Students by Admissions Rate",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
-
-# library(dotwhisker)
-
-
-
-  
-aa_urban <- ggplot(mean_data, aes(x = as.factor(degree_of_urbanization_urban_centric_locale), y = mean_african_american)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Level of Urbanization of the Institution") + 
-  ylab("Percent Black or African American") +
-  theme_classic() + 
-  labs(title = "Percent of Black or African Students by Level of Urbanization",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
-
-
-
-model_african_american <- lm(mean_african_american ~ mean_enrollment + 
-                               mean_women + 
-                               mean_admitted,
-                             data = mean_data) %>%
-  tidy(conf.int = TRUE)
-dwplot(model_african_american) %>%
-  relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
-                     mean_women = "Percentage of Women",
-                     mean_admitted = "Admissions Rate") +
-  theme_classic() +
-  ggtitle("Correlation between Independent Variables and African American Student Population") +
-  theme(legend.position = "none") 
-model_african_american_2 <- lm(mean_african_american ~ degree_of_urbanization_urban_centric_locale,
-                               data = mean_data) %>%
-  tidy(conf.int = TRUE)
-
-dwplot(model_african_american_2, show_intercept = TRUE) %>%
-  relabel_predictors(`(Intercept)` = "Baseline: Rural",
-                     degree_of_urbanization_urban_centric_localeTown = "Town",
-                     degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
-                     degree_of_urbanization_urban_centric_localeCity = "City") +
-  theme_classic() +
-  ggtitle("Correlation between Locale and African American Student Population") +
-  theme(legend.position = "none")
-
-
-
-
-aa_institution
-
-```
-
-```{r}
-ggplot(mean_data, aes(x = as.factor(institution_size_category), y = mean_hispanic)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Siz of Institution") + 
-  ylab("Percent Latinx Students") +
-  theme_classic() + 
-  labs(title = "Percent of Latinx Students by Size of Institution",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_hispanic, color = "red")
-
-ggplot(mean_data, aes(x = as.factor(quantiles_women), y = mean_hispanic)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Percent Women") + 
-  ylab("Percent Latinx Students") +
-  theme_classic() + 
-  labs(title = "Percent of Latinx Students by Percent of Female Students",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_hispanic, color = "red")
-
-ggplot(mean_data, aes(x = as.factor(quantiles_admission), y = mean_hispanic)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Admissions Rate") + 
-  ylab("Percent Latinx Students") +
-  theme_classic() + 
-  labs(title = "Percent of Latinx Students by Admissions Rate",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_hispanic, color = "red")
-
-ggplot(mean_data, aes(x = as.factor(degree_of_urbanization_urban_centric_locale), y = mean_hispanic)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Level of Urbanization of the Institution") + 
-  ylab("Percent Latinx Students") +
-  theme_classic() + 
-  labs(title = "Percent of Latinx Students by Level of Urbanization",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_african_american, color = "red")
-
-model_hispanic <- lm(mean_hispanic ~ mean_enrollment + 
-                               mean_women + 
-                               mean_admitted,
-                             data = mean_data) %>%
-  tidy(conf.int = TRUE)
-dwplot(model_hispanic) %>%
-  relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
-                     mean_women = "Percentage of Women",
-                     mean_admitted = "Admissions Rate") +
-  theme_classic() +
-  ggtitle("Correlation between Independent Variables and Latinx Student Population") +
-  theme(legend.position = "none") 
-model_hispanic_2 <- lm(mean_hispanic ~ degree_of_urbanization_urban_centric_locale,
-                               data = mean_data) %>%
-  tidy(conf.int = TRUE)
-
-dwplot(model_hispanic_2, show_intercept = TRUE) %>%
-  relabel_predictors(`(Intercept)` = "Baseline: Rural",
-                     degree_of_urbanization_urban_centric_localeTown = "Town",
-                     degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
-                     degree_of_urbanization_urban_centric_localeCity = "City") +
-  theme_classic() +
-  ggtitle("Correlation between Locale and Latinx Student Population") +
-  theme(legend.position = "none")
-
-```
-
-
-```{r}
-ggplot(mean_data, aes(x = as.factor(institution_size_category), y = mean_asian)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Size of Institution") + 
-  ylab("Percent Asian Students") +
-  theme_classic() + 
-  labs(title = "Percent of Asian Students by Size of Institution",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_asian, color = "red")
-
-ggplot(mean_data, aes(x = as.factor(quantiles_women), y = mean_asian)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Percent Women") + 
-  ylab("Percent Asian Students") +
-  theme_classic() + 
-  labs(title = "Percent of Asian Students by Percent of Female Students",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_asian, color = "red")
-
-ggplot(mean_data, aes(x = as.factor(quantiles_admission), y = mean_asian)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Admissions Rate") + 
-  ylab("Percent Asian Students") +
-  theme_classic() + 
-  labs(title = "Percent of Asian Students by Admissions Rate",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_asian, color = "red")
-
-ggplot(mean_data, aes(x = as.factor(degree_of_urbanization_urban_centric_locale), y = mean_asian)) +
-  geom_boxplot(alpha = 0.25) +
-  xlab("Level of Urbanization of the Institution") + 
-  ylab("Percent Asian Students") +
-  theme_classic() + 
-  labs(title = "Percent of Asian Students by Level of Urbanization",
-       subtitle = "With comparison at national population estimate") +
-  geom_hline(yintercept = census_data_2$pct_asian, color = "red")
-
-model_asian <- lm(mean_asian ~ mean_enrollment + 
-                               mean_women + 
-                               mean_admitted,
-                             data = mean_data) %>%
-  tidy(conf.int = TRUE)
-dwplot(model_asian) %>%
-  relabel_predictors(mean_enrollment = "Undergraduate Enrollment",
-                     mean_women = "Percentage of Women",
-                     mean_admitted = "Admissions Rate") +
-  theme_classic() +
-  ggtitle("Correlation between Independent Variables \n & Asian Student Population") +
-  theme(legend.position = "none") 
-model_asian_2 <- lm(mean_asian ~ degree_of_urbanization_urban_centric_locale,
-                               data = mean_data) %>%
-  tidy(conf.int = TRUE)
-
-dwplot(model_asian_2, show_intercept = TRUE) %>%
-  relabel_predictors(`(Intercept)` = "Baseline: Rural",
-                     degree_of_urbanization_urban_centric_localeTown = "Town",
-                     degree_of_urbanization_urban_centric_localeSuburb = "Suburb",
-                     degree_of_urbanization_urban_centric_localeCity = "City") +
-  theme_classic() +
-  ggtitle("Correlation between Locale \n & Asian Student Population") +
-  theme(legend.position = "none")
 ```
