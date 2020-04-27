@@ -143,9 +143,9 @@ joined_data <- join_data(joined_data, data_2012)
 joined_data <- join_data(joined_data, data_2011)
 joined_data <- join_data(joined_data, data_2010)
 
-write.csv(joined_data, 'joined_data.csv', row.names = F)
+# write.csv(joined_data, 'joined_data.csv', row.names = F)
 
-test <- read.csv('joined_data.csv', stringsAsFactors = F)
+# test <- read.csv('joined_data.csv', stringsAsFactors = F)
 ```
 
 ```{r, include = FALSE}
@@ -191,7 +191,7 @@ census_data_2 <- census_data_2 %>%
   mutate(pct_other = (pop_other / total_pop) * 100) %>%
   mutate(pct_two_or_more_races = (pop_two_or_more_races / total_pop) * 100) %>%
   mutate(pct_hispanic = (pop_hispanic / total_pop) * 100)
-write.csv(census_data_2, 'census.csv', row.names = F)
+# write.csv(census_data_2, 'census.csv', row.names = F)
 ```
 
 
@@ -237,7 +237,7 @@ mean_data <- joined_data %>%
                                            percent_admitted_total %in% (75:100) ~ "75 to 100%")) %>%
   filter(!is.na(quantiles_admission)) %>%
   select(name, year, undergraduate_enrollment, tuition_and_fees_2018_19, institution_size_category, level_of_institution, degree_of_urbanization_urban_centric_locale, mean_enrollment, mean_african_american, mean_asian, mean_hispanic, mean_white, mean_women, mean_admitted, quantiles_women, quantiles_admission)
-write.csv(mean_data, 'mean_data.csv', row.names = F)
+# write.csv(mean_data, 'mean_data.csv', row.names = F)
 
 
 aa_institution <- ggplot(mean_data, aes(x = institution_size_category, y = mean_african_american)) +
