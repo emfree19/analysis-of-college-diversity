@@ -59,16 +59,29 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                  fluidPage(
                      sidebarPanel(
                          width = 6,
+                         
+                         # This is the code for the pull down menu
+                         
                          selectInput(
                              "plot_type_h",
                              "Independent Variables",
                              c("Size of Institution, Percent Women, Admissions Rate" = "a",
                                "Locale" = "b")),
                          h4("Correlation Coefficients"),
+                         
+                         # These correspond to the plot and text on the left 
+                         # side of the page 
+                         
                          plotOutput("h_coefficients"),
                          textOutput("h_output_1")
                          ),
                      mainPanel(width = 6,
+                               
+                               # These correspond to the graphics on the right
+                               # side of the page. I chose to summarize the data
+                               # shown in the graphics here instead of on a 
+                               # separate page 
+                               
                                plotOutput("h_institution"),
                                plotOutput("h_women"),
                                plotOutput("h_admissions"))
@@ -76,10 +89,19 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         tabPanel("African American Student Population",
                  fluidPage(
                      sidebarPanel(
+                         
+                         # I tried a couple of different values for the width
+                         # of the sidebar. 6 seemed to be the best option 
+                         # because the graphic needed adequate space 
+                         
                          width = 6,
                          selectInput(
                              "plot_type_aa",
                              "Independent Variables",
+                             
+                             # These are the two options in the pull down menu
+                             # This is the same for the three population pages
+                             
                              c("Size of Institution, Percent Women, Admissions Rate" = "a", 
                                "Locale" = "b")),
                          h4("Correlation Coefficients"),
@@ -102,6 +124,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                plotOutput("aa_women"),
                                plotOutput("aa_admissions"))
                  )),
+        
+        # Here is the third page. The design decision for this page was the same
+        # as the two previous pages 
+        
         tabPanel("Asian Student Population",
                  fluidPage(
                      sidebarPanel(
@@ -120,6 +146,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                plotOutput("a_women"),
                                plotOutput("a_admissions"))
                  )),
+        
+        # Here is the About Page. It contains the background information for the 
+        # project 
+        
         tabPanel("About", 
                  titlePanel("About"),
                  h3("Project Background and Motivations"),
@@ -149,6 +179,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                    universities using linear models."),
                  h3("Data"),
                  p("The", 
+                   
+                   # Here is a link to where you can create the original data
+                   # sets before wrangling and joining 
+                   
                    a(href = "https://nces.ed.gov/ipeds/use-the-data", "National Center 
                  for Education Statistics"), 
                    "has  data admissions data for almost 7,000 upper level 
@@ -160,6 +194,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                  (instead of data from individual years) in order lessen the 
                  effects of any anomalous data. In addition to the National 
                  Center for Education Statistics Data, I used", 
+                   
+                   # Here is information regarding the tidycensus package which
+                   # I used to create the census_data_2 file 
+                   
                    a(href = "https://cran.r-project.org/web/packages/tidycensus/tidycensus.pdf", 
                      "tidycensus"),
                    "package which has population data for the United States for 
@@ -174,6 +212,12 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                  about the project, you can reach me at 
                  efreeman@college.harvard.edu."),
                  p("The code for this project can be found at this",
+                   
+                   # Here's the repo containing this code. It is sufficiently
+                   # cleaned up and should only contain the code for this graph
+                   # Original milestones and data wrangling for this project are 
+                   # no longer present
+                   
                    a(href = "https://github.com/emfree19/analysis-of-college-diversity", "github repo"), "."))
         )
 )
@@ -183,6 +227,12 @@ ui <- fluidPage(theme = shinytheme("flatly"),
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     output$aa_output_1 <- renderText({
+        
+        # This is the summary of the data on the African American page when
+        # the menu option is the first one. It summarizes the result of the data
+        # here (and not on a separate page). The reasoning for this is in the 
+        # code above 
+        
         if(input$plot_type_aa == "a") {
             "Above, the plot shows the correlation coefficients between the mean 
             percent of African American students and the variables undergraduate enrollment 
@@ -203,6 +253,9 @@ server <- function(input, output) {
             instead of scatterplots because the scatterplots were prone to 
             overplotting."
         }
+        
+        # This is the summary of the results of the locale data 
+        
         else{
             if(input$plot_type_aa == "b"){
                 "On this page, we have another independent variable, locale of 
@@ -216,6 +269,9 @@ server <- function(input, output) {
         }
         
     })
+    
+    # These are the plots shown on the African American page for both options
+    # in the pull down menu
     
     output$aa_coefficients <- renderPlot({
         if(input$plot_type_aa == "a") {
@@ -302,6 +358,11 @@ server <- function(input, output) {
         }
         else{}
     })
+    
+    # This is the output for the Latinx page. The design decisions for the 
+    # individuals graphs were defined in earlier iterations/milestones for the
+    # project 
+    
     output$h_output_1 <- renderText({
         if(input$plot_type_h == "a") {
             "Above, the plot shows the correlation coefficients between the mean 
@@ -418,6 +479,9 @@ server <- function(input, output) {
         }
         else{}
     })
+    
+    
+    # Here is the code for the text and the graphics on the Asian page 
     
     output$a_output_1 <- renderText({
         if(input$plot_type_a == "a") {
