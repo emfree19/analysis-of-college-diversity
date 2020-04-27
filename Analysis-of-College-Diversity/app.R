@@ -7,6 +7,9 @@
 #    http://shiny.rstudio.com/
 #
 
+# These are the libraries required for the code below to run and for the app
+# to be published
+
 library(shiny)
 library(tidyverse)
 library(dplyr)
@@ -21,6 +24,11 @@ library(broom)
 library(patchwork) 
 library(shinythemes)
 
+# When mean_data.csv was originally saved, the levels for the factors were
+# defined but they needed to be redefined after redownload.
+# This .csv file is actually the wrangled version of 10 joined education data 
+# sets from earlier iterations of the project
+
 mean_data <- read_csv("mean_data.csv", col_types = cols())
 mean_data <- mean_data %>%
     mutate(institution_size_category = factor(institution_size_category,
@@ -33,11 +41,85 @@ mean_data <- mean_data %>%
                factor(degree_of_urbanization_urban_centric_locale, 
                       levels = c("Rural", "Town", "Suburb", "City")))
 
+# This another data set from which I pulled information
+
 census_data_2 <- read_csv("census.csv", col_types = cols())
 
+
+# I used the shinytheme() package to create a nice format for the app
+
 ui <- fluidPage(theme = shinytheme("flatly"),
+                
+    # I started with the page containing the Latinx population at colleges 
+    # because they are the largest minority group in the United States 
+                
     ui <- navbarPage(
         "Diversity of Upper Level Education",
+        tabPanel("Latinx Student Population",
+                 fluidPage(
+                     sidebarPanel(
+                         width = 6,
+                         selectInput(
+                             "plot_type_h",
+                             "Independent Variables",
+                             c("Size of Institution, Percent Women, Admissions Rate" = "a",
+                               "Locale" = "b")),
+                         h4("Correlation Coefficients"),
+                         plotOutput("h_coefficients"),
+                         textOutput("h_output_1")
+                         ),
+                     mainPanel(width = 6,
+                               plotOutput("h_institution"),
+                               plotOutput("h_women"),
+                               plotOutput("h_admissions"))
+                 )),
+        tabPanel("African American Student Population",
+                 fluidPage(
+                     sidebarPanel(
+                         width = 6,
+                         selectInput(
+                             "plot_type_aa",
+                             "Independent Variables",
+                             c("Size of Institution, Percent Women, Admissions Rate" = "a", 
+                               "Locale" = "b")),
+                         h4("Correlation Coefficients"),
+                         
+                         # This corresponds to the graphic and text on the left
+                         # side of the page. I chose to speak about the results 
+                         # of my project here instead of on a separate page 
+                         # because I thought it made more sense and viewers 
+                         # could easily refer to the graphics 
+                         
+                         plotOutput("aa_coefficients"),
+                         textOutput("aa_output_1")
+                     ),
+                     
+                     # These correspond to the plots on the right side of the
+                     # page 
+                     
+                     mainPanel(width = 6, 
+                               plotOutput("aa_institution"),
+                               plotOutput("aa_women"),
+                               plotOutput("aa_admissions"))
+                 )),
+        tabPanel("Asian Student Population",
+                 fluidPage(
+                     sidebarPanel(
+                         width = 6,
+                         selectInput(
+                             "plot_type_a",
+                             "Independent Variables",
+                             c("Size of Institution, Percent Women, Admissions Rate" = "a",
+                               "Locale" = "b")),
+                             h4("Correlation Coefficients"),
+                             plotOutput("a_coefficients"),
+                             textOutput("a_output_1")
+                     ),
+                     mainPanel(width = 6,
+                               plotOutput("a_institution"),
+                               plotOutput("a_women"),
+                               plotOutput("a_admissions"))
+                 )),
         tabPanel("About", 
                  titlePanel("About"),
                  h3("Project Background and Motivations"),
@@ -67,9 +149,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                    universities using linear models."),
                  h3("Data"),
                  p("The", 
-                 a(href = "https://nces.ed.gov/ipeds/use-the-data", "National Center 
+                   a(href = "https://nces.ed.gov/ipeds/use-the-data", "National Center 
                  for Education Statistics"), 
-                 "has  data admissions data for almost 7,000 upper level 
+                   "has  data admissions data for almost 7,000 upper level 
                  educational institutions from 1980 to 2018. I used their 
                  survey data to create custom data files with the variables I 
                  wanted to investigate. I downloaded 9 datasets from 2010 to 
@@ -78,9 +160,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                  (instead of data from individual years) in order lessen the 
                  effects of any anomalous data. In addition to the National 
                  Center for Education Statistics Data, I used", 
-                 a(href = "https://cran.r-project.org/web/packages/tidycensus/tidycensus.pdf", 
-                   "tidycensus"),
-                 "package which has population data for the United States for 
+                   a(href = "https://cran.r-project.org/web/packages/tidycensus/tidycensus.pdf", 
+                     "tidycensus"),
+                   "package which has population data for the United States for 
                  many years and down to the county level. I chose 2010 data 
                  at the country level with which to compare college racial data, 
                  so I could determine overrepresentation or underrepresentation 
@@ -92,61 +174,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                  about the project, you can reach me at 
                  efreeman@college.harvard.edu."),
                  p("The code for this project can be found at this",
-                   a(href = "https://github.com/emfree19/final_project", "github repo"), ".")),
-        tabPanel("Latinx Student Population",
-                 fluidPage(
-                     sidebarPanel(
-                         width = 6,
-                         selectInput(
-                             "plot_type_h",
-                             "Independent Variables",
-                             c("Size of Institution, Percent Women, Admissions Rate" = "a",
-                               "Locale" = "b")),
-                         h4("Correlation Coefficients"),
-                         plotOutput("h_coefficients"),
-                         textOutput("h_output_1")
-                         ),
-                     mainPanel(width = 6,
-                               plotOutput("h_institution"),
-                               plotOutput("h_women"),
-                               plotOutput("h_admissions"))
-                 )),
-        tabPanel("African American Student Population",
-                 fluidPage(
-                     sidebarPanel(
-                         width = 6,
-                         selectInput(
-                             "plot_type_aa",
-                             "Independent Variables",
-                             c("Size of Institution, Percent Women, Admissions Rate" = "a", 
-                               "Locale" = "b")),
-                         h4("Correlation Coefficients"),
-                         plotOutput("aa_coefficients"),
-                         textOutput("aa_output_1")
-                     ),
-                     mainPanel(width = 6, 
-                               plotOutput("aa_institution"),
-                               plotOutput("aa_women"),
-                               plotOutput("aa_admissions"))
-                 )),
-        tabPanel("Asian Student Population",
-                 fluidPage(
-                     sidebarPanel(
-                         width = 6,
-                         selectInput(
-                             "plot_type_a",
-                             "Independent Variables",
-                             c("Size of Institution, Percent Women, Admissions Rate" = "a",
-                               "Locale" = "b")),
-                             h4("Correlation Coefficients"),
-                             plotOutput("a_coefficients"),
-                             textOutput("a_output_1")
-                     ),
-                     mainPanel(width = 6,
-                               plotOutput("a_institution"),
-                               plotOutput("a_women"),
-                               plotOutput("a_admissions"))
-                 ))
+                   a(href = "https://github.com/emfree19/analysis-of-college-diversity", "github repo"), "."))
         )
 )
         
